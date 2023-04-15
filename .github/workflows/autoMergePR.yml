@@ -5,23 +5,21 @@ on:
     types:
       - opened
       - synchronize
+  pull_request_review:
+    types:
+      - submitted
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Auto Merge PR
-        run: |
-          PR_NUMBER=$(jq --raw-output .number "$GITHUB_EVENT_PATH")
-          BRANCH_NAME=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
-          echo "Merging PR #$PR_NUMBER from branch $BRANCH_NAME"
-          git fetch origin
-          git checkout $BRANCH_NAME
-          git merge --no-ff --no-edit origin/main
-          git push origin $BRANCH_NAME
+      - name: automerge
+        uses: pascalgn/automerge-action@v0.14.3
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MERGE_LABELS: "automerge,!work in progress"
+          MERGE_METHOD: "merge"
+          MERGE_COMMIT_MESSAGE: "Automatic merge of PR {pullRequest.number}: {pullRequest.title}"
+          MERGE_FORKS: "false"
+          UPDATE_LABELS: "automerge,!work in progress"
+          UPDATE_METHOD: "merge"
