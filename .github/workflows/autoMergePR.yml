@@ -1,25 +1,18 @@
-name: Auto Merge PR
-
+name: automerge
 on:
   pull_request:
     types:
       - opened
-      - synchronize
-  pull_request_review:
+  check_suite:
     types:
-      - submitted
-
+      - completed
+  status: {}
 jobs:
-  auto-merge:
+  automerge:
     runs-on: ubuntu-latest
     steps:
-      - name: Merge pull requests (automerge-action)
-        uses: pascalgn/automerge-action@v0.15.6
+      - id: automerge
+        name: automerge
+        uses: "pascalgn/automerge-action@v0.15.6"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          MERGE_LABELS: "automerge,!work in progress"
-          MERGE_METHOD: "merge"
-          MERGE_COMMIT_MESSAGE: "Automatic merge of PR {pullRequest.number}: {pullRequest.title}"
-          MERGE_FORKS: "false"
-          UPDATE_LABELS: "automerge,!work in progress"
-          UPDATE_METHOD: "merge"
