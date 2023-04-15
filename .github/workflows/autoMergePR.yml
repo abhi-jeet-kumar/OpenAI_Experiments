@@ -17,10 +17,11 @@ jobs:
       - name: Auto Merge PR
         run: |
           PR_NUMBER=$(jq --raw-output .number "$GITHUB_EVENT_PATH")
-          echo "Merging PR #$PR_NUMBER"
+          BRANCH_NAME=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
+          echo "Merging PR #$PR_NUMBER from branch $BRANCH_NAME"
           git fetch origin
-          git checkout "${{ github.event.pull_request.head.ref }}"
+          git checkout $BRANCH_NAME
           git merge --no-ff --no-edit origin/main
-          git push origin "${{ github.event.pull_request.head.ref }}"
+          git push origin $BRANCH_NAME
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
