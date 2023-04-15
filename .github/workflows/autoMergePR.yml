@@ -11,14 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Auto Merge PR
-        run: |
-          PR_NUMBER=$(jq --raw-output .number "$GITHUB_EVENT_PATH")
-          echo "Merging PR #$PR_NUMBER"
-          
-          curl --location --request PUT \
-          "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" \
-          --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          --header "Content-Type: application/json" \
-          --data '{ "commit_title": "Automatically merged", "merge_method": "merge" }'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v5.1.0
+        with:
+          script: |
+            const { repo, pull_request } = context;
+            const mergeParams = {
+              owner: repo.owner,
+              repo: repo.repo,
+              pull_number: pull_request.number,
+              merge_method: "merge",
+              commit_title: `Automatically merged PR #${pull_request.number}`
+            };
+            await github.rest.pulls.merge(mergeParams);
+          github-token: ${{ secrets.GITHUB_TOKEN }}
